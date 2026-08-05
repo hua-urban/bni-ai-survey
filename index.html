@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BNI 華都更｜AI 課程課前問卷</title>
+<meta name="description" content="3 分鐘，15 題。填完你就是課程共創學員。">
+<style>
+:root{
+  --red:#C8102E; --gold:#A8813A;
+  --ground:#FBF9F6; --surface:#FFFFFF; --line:#E5DFD6; --line-soft:#F1ECE4;
+  --ink:#1D1A17; --ink-2:#5C554B; --ink-3:#8B8377;
+  --tint:#FDF3F4; --tint-line:#F2D9DD;
+  --ok:#2E7D52; --r:12px;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --red:#F0576F; --gold:#D9B877;
+    --ground:#161412; --surface:#211E1B; --line:#37312B; --line-soft:#282421;
+    --ink:#F2EEE8; --ink-2:#B4ACA1; --ink-3:#867E73;
+    --tint:#251A1C; --tint-line:#43282D; --ok:#5FBE8C; }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  font-size:16px;line-height:1.75;letter-spacing:.012em;-webkit-font-smoothing:antialiased}
+.wrap{max-width:640px;margin:0 auto;padding:0 18px 140px}
+
+/* progress */
+#bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--line-soft);z-index:50}
+#bar i{display:block;height:100%;width:0;background:var(--red);transition:width .25s ease}
+@media (prefers-reduced-motion:reduce){#bar i{transition:none}}
+
+header{padding:44px 0 22px}
+.kicker{display:inline-block;font-size:12px;letter-spacing:.08em;color:var(--red);font-weight:700;
+  background:var(--tint);border:1px solid var(--tint-line);border-radius:3px;padding:3px 10px;margin-bottom:14px}
+h1{font-size:clamp(24px,6vw,32px);line-height:1.3;margin:0 0 14px;letter-spacing:-.02em;font-weight:700}
+.intro{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;margin:0 0 32px}
+.intro p{margin:0 0 14px;font-size:15.5px;color:var(--ink-2);line-height:1.75}
+.intro p:last-child{margin:0}
+.intro b{color:var(--ink);font-weight:600}
+.intro ol{margin:0 0 14px;padding-left:20px;color:var(--ink-2);font-size:15.5px}
+.intro ol li{margin:5px 0}
+
+/* question */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px 20px 18px;margin:0 0 14px;scroll-margin-top:20px}
+.q.err{border-color:var(--red);box-shadow:0 0 0 3px var(--tint)}
+.qh{display:flex;gap:11px;align-items:baseline;margin-bottom:4px}
+.qn{flex:0 0 auto;font-size:12px;font-weight:700;color:var(--red);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.qt{font-size:16.5px;font-weight:600;line-height:1.6;margin:0}
+.qhint{font-size:13px;color:var(--ink-3);margin:2px 0 0 33px}
+.req{color:var(--red);font-weight:700}
+.opt-wrap{margin:14px 0 0}
+label.opt{display:flex;gap:11px;align-items:flex-start;padding:11px 13px;border:1px solid var(--line);
+  border-radius:9px;margin:7px 0;cursor:pointer;font-size:15.5px;line-height:1.6;color:var(--ink-2);
+  background:transparent;transition:border-color .12s,background .12s}
+label.opt:has(input:checked){border-color:var(--red);background:var(--tint);color:var(--ink)}
+label.opt:has(input:disabled){opacity:.45;cursor:not-allowed}
+label.opt input{flex:0 0 auto;margin:5px 0 0;accent-color:var(--red);width:17px;height:17px}
+label.opt b{color:var(--ink);font-weight:600}
+label.opt small{display:block;font-size:13.5px;color:var(--ink-3);margin-top:1px}
+@media (prefers-reduced-motion:reduce){label.opt{transition:none}}
+input[type=text],textarea{width:100%;margin-top:12px;padding:12px 14px;border:1px solid var(--line);
+  border-radius:9px;background:var(--ground);color:var(--ink);font:inherit;font-size:16px;resize:vertical}
+input[type=text]:focus,textarea:focus{outline:2px solid var(--red);outline-offset:1px;border-color:transparent}
+textarea{min-height:76px;line-height:1.7}
+.count{font-size:12.5px;color:var(--ink-3);margin-top:8px;text-align:right}
+.count.full{color:var(--red);font-weight:600}
+.emsg{display:none;font-size:13.5px;color:var(--red);margin-top:10px;font-weight:600}
+.q.err .emsg{display:block}
+
+.part{display:flex;align-items:baseline;gap:12px;margin:32px 0 12px}
+.part-n{font-size:11.5px;font-weight:700;letter-spacing:.12em;color:var(--red);white-space:nowrap}
+.part-r{flex:1;height:1px;background:var(--line)}
+.part-t{font-size:13px;color:var(--ink-3);white-space:nowrap}
+
+/* submit */
+.footbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:linear-gradient(to top,var(--ground) 62%,transparent);
+  padding:16px 18px calc(18px + env(safe-area-inset-bottom))}
+.footbar .inner{max-width:640px;margin:0 auto;display:flex;gap:12px;align-items:center}
+button.send{flex:1;background:var(--red);color:#fff;border:0;border-radius:11px;padding:15px 20px;
+  font:inherit;font-size:16.5px;font-weight:700;cursor:pointer;letter-spacing:.02em}
+button.send:disabled{opacity:.55;cursor:progress}
+button.send:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.saved{font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+
+/* done */
+#done{display:none}
+#done.on{display:block}
+#form.off{display:none}
+.donecard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:28px 24px;margin:24px 0 0}
+.donecard h2{margin:0 0 8px;font-size:24px;letter-spacing:-.01em}
+.donecard .tick{width:44px;height:44px;border-radius:50%;background:var(--ok);color:#fff;display:flex;
+  align-items:center;justify-content:center;font-size:22px;margin:0 0 16px}
+.donecard ol{padding-left:20px;color:var(--ink-2);font-size:15.5px;margin:14px 0 18px}
+.donecard ol li{margin:8px 0}
+.donecard b{color:var(--ink)}
+.donecard .last{font-size:15.5px;color:var(--ink);font-weight:600;margin:0}
+footer{margin-top:38px;font-size:13px;color:var(--ink-3);text-align:center}
+</style>
+</head>
+<body>
+<div id="bar"><i></i></div>
+
+<div class="wrap">
+
+<div id="form">
+<header>
+  <span class="kicker">BNI 華都更分會</span>
+  <h1>AI 課程課前問卷</h1>
+</header>
+
+<div class="intro">
+  <p>我們正在籌備分會的第一堂 AI 課程。</p>
+  <p>這份問卷不是要考你，是要確認<b>這堂課要從哪裡開始講</b>——分會裡有人每天都在用，也有人還沒打開過。開錯深度，兩邊都浪費時間。</p>
+  <p>填完你會得到三件事：</p>
+  <ol>
+    <li>你是<b>課程共創學員</b>，最後的課程大綱會照這份問卷的統計結果排。</li>
+    <li>統計結果會整理成「分會最想學的 Top 5」，公開給大家看。</li>
+    <li>開課前你是第一批收到通知的人，<b>名額優先保留</b>。</li>
+  </ol>
+  <p>15 題，大約 3 分鐘。沒有標準答案，越誠實對你越有利。</p>
+</div>
+
+<div class="part"><span class="part-n">第一部分</span><span class="part-r"></span><span class="part-t">你是誰</span></div>
+
+<div class="q" id="q1" data-req="1" data-kind="text">
+  <div class="qh"><span class="qn">Q1</span><p class="qt">你的姓名與分會編號<span class="req"> *</span></p></div>
+  <p class="qhint">例：007 張瓊安</p>
+  <input type="text" name="q1" autocomplete="name" placeholder="編號　姓名">
+  <p class="emsg">這題要填</p>
+</div>
+
+<div class="part"><span class="part-n">第二部分</span><span class="part-r"></span><span class="part-t">你現在用到什麼程度</span></div>
+
+<div class="q" id="q2" data-req="1" data-kind="radio">
+  <div class="qh"><span class="qn">Q2</span><p class="qt">下面哪一句最接近你現在的狀況？<span class="req"> *</span></p></div>
+  <div class="opt-wrap">
+    <label class="opt"><input type="radio" name="q2" value="L0"><span>我完全沒用過，或聽過但沒真的打開來用</span></label>
+    <label class="opt"><input type="radio" name="q2" value="L1"><span>我用過一兩次，好奇試試看，沒有固定拿它做事</span></label>
+    <label class="opt"><input type="radio" name="q2" value="L2"><span>我工作上偶爾會用（每週或每個月幾次），但還是習慣自己來</span></label>
+    <label class="opt"><input type="radio" name="q2" value="L3"><span>我幾乎每天都在用，處理文件、回訊息、寫東西</span></label>
+    <label class="opt"><input type="radio" name="q2" value="L4"><span>除了每天用，我還會串不同工具、寫固定的指令，或讓它自動跑一連串的事</span></label>
+  </div>
+  <p class="emsg">這題要選一個</p>
+</div>
+
+<div class="q" id="q3" data-req="1" data-kind="check">
+  <div class="qh"><span class="qn">Q3</span><p class="qt">你手上有在用的是哪幾個？<span class="req"> *</span></p></div>
+  <p class="qhint">可以複選</p>
+  <div class="opt-wrap">
+    <label class="opt"><input type="checkbox" name="q3" value="ChatGPT"><span>ChatGPT</span></label>
+    <label class="opt"><input type="checkbox" name="q3" value="Gemini"><span>Gemini（Google 的）</span></label>
+    <label class="opt"><input type="checkbox" name="q3" value="Copilot"><span>Copilot（微軟的，或 Office 裡面那個）</span></label>
+    <label class="opt"><input type="checkbox" name="q3" value="Claude"><span>Claude</span></label>
+    <label class="opt"><input type="checkbox" name="q3" value="NotebookLM"><span>NotebookLM（Google 的筆記本）</span></label>
+    <label class="opt"><input type="checkbox" name="q3" value="自動化工具"><span>Zapier／Make／n8n 這類自動化串接工具</span></label>
+    <label class="opt"><input type="checkbox" name="q3" value="公司指定"><span>公司或客戶指定的 AI 工具</span></label>
+    <label class="opt"><input type="checkbox" name="q3" value="都沒有"><span><b>都沒有／我不確定自己用的是哪一個</b></span></label>
+  </div>
+  <p class="emsg">至少選一個</p>
+</div>
+
+<div class="q" id="q4" data-req="1" data-kind="check">
+  <div class="qh"><span class="qn">Q4</span><p class="qt">最近一週，你實際拿 AI 做過下面哪些事？<span class="req"> *</span></p></div>
+  <p class="qhint">可以複選。想不起來就選最後一個</p>
+  <div class="opt-wrap">
+    <label class="opt"><input type="checkbox" name="q4" value="寫文案貼文"><span>寫文案、貼文</span></label>
+    <label class="opt"><input type="checkbox" name="q4" value="做簡報"><span>做簡報</span></label>
+    <label class="opt"><input type="checkbox" name="q4" value="翻譯潤稿"><span>翻譯或潤稿</span></label>
+    <label class="opt"><input type="checkbox" name="q4" value="摘要"><span>摘要長文章、會議記錄</span></label>
+    <label class="opt"><input type="checkbox" name="q4" value="查資料"><span>查資料、找答案</span></label>
+    <label class="opt"><input type="checkbox" name="q4" value="做表格"><span>做表格、整理數據</span></label>
+    <label class="opt"><input type="checkbox" name="q4" value="生成圖片影片"><span>生成圖片或影片</span></label>
+    <label class="opt"><input type="checkbox" name="q4" value="寫程式做網頁"><span>寫程式、做網頁</span></label>
+    <label class="opt"><input type="checkbox" name="q4" value="沒用"><span><b>最近一週完全沒用</b></span></label>
+  </div>
+  <p class="emsg">至少選一個</p>
+</div>
+
+<div class="part"><span class="part-n">第三部分</span><span class="part-r"></span><span class="part-t">你卡在哪</span></div>
+
+<div class="q" id="q5" data-req="1" data-kind="check" data-max="3">
+  <div class="qh"><span class="qn">Q5</span><p class="qt">用 AI 的時候，下面哪幾件事讓你最有感？<span class="req"> *</span></p></div>
+  <p class="qhint">最多選 3 個</p>
+  <div class="opt-wrap">
+    <label class="opt"><input type="checkbox" name="q5" value="不知道問什麼"><span>不知道要問它什麼，打開對話框就卡住</span></label>
+    <label class="opt"><input type="checkbox" name="q5" value="答案很廢"><span>問出來的答案廢話很多，抓不到重點</span></label>
+    <label class="opt"><input type="checkbox" name="q5" value="講得肯定但錯"><span>它講得很肯定，但後來發現是錯的</span></label>
+    <label class="opt"><input type="checkbox" name="q5" value="每次重講背景"><span>每次都要重新跟它解釋一次背景</span></label>
+    <label class="opt"><input type="checkbox" name="q5" value="複製貼上麻煩"><span>資料整理、複製貼上進去太麻煩</span></label>
+    <label class="opt"><input type="checkbox" name="q5" value="不知道用哪個"><span>不知道這件事該用哪一個工具</span></label>
+    <label class="opt"><input type="checkbox" name="q5" value="資料不敢丟"><span>公司或客戶的資料不敢丟進去，怕外流</span></label>
+    <label class="opt"><input type="checkbox" name="q5" value="權限不夠"><span>公司電腦權限不夠，想裝的東西裝不了</span></label>
+    <label class="opt"><input type="checkbox" name="q5" value="怕打指令"><span>看到要打指令、要安裝，就不想碰了</span></label>
+    <label class="opt"><input type="checkbox" name="q5" value="學完就忘"><span>上課學會了，回到工作就忘記用</span></label>
+    <label class="opt"><input type="checkbox" name="q5" value="沒時間"><span>沒時間學，工作已經忙不過來</span></label>
+    <label class="opt"><input type="checkbox" name="q5" value="沒感覺有幫助"><span>用了，但沒感覺對工作有幫助</span></label>
+    <label class="opt"><input type="checkbox" name="q5" value="沒困擾"><span>以上都還好，我沒什麼困擾</span></label>
+  </div>
+  <p class="count">已選 <b>0</b>／3</p>
+  <p class="emsg">至少選一個</p>
+</div>
+
+<div class="q" id="q6" data-req="1" data-kind="text">
+  <div class="qh"><span class="qn">Q6</span><p class="qt">如果 AI 能幫你解決工作上的一件事，你最想解決哪一件？<span class="req"> *</span></p></div>
+  <p class="qhint">一句話就好</p>
+  <textarea name="q6" rows="2" placeholder="例：每次寫物件說明都要重打一次"></textarea>
+  <p class="emsg">這題要填</p>
+</div>
+
+<div class="q" id="q7" data-kind="text">
+  <div class="qh"><span class="qn">Q7</span><p class="qt">這件事你已經試過什麼方法解決？</p></div>
+  <p class="qhint">選填</p>
+  <textarea name="q7" rows="2" placeholder="沒試過就留空"></textarea>
+</div>
+
+<div class="part"><span class="part-n">第四部分</span><span class="part-r"></span><span class="part-t">課要怎麼開</span></div>
+
+<div class="q" id="q8" data-req="1" data-kind="check" data-max="3">
+  <div class="qh"><span class="qn">Q8</span><p class="qt">下面這些單元，你最想上哪幾個？<span class="req"> *</span></p></div>
+  <p class="qhint">最多選 3 個</p>
+  <div class="opt-wrap">
+    <label class="opt"><input type="checkbox" name="q8" value="A從零開始"><span><b>A. 從零開始</b><small>第一次打開 AI，該怎麼問第一句話</small></span></label>
+    <label class="opt"><input type="checkbox" name="q8" value="B做簡報"><span><b>B. 做簡報</b><small>一堆零散資料，變成一份能上台的簡報</small></span></label>
+    <label class="opt"><input type="checkbox" name="q8" value="C整理資料"><span><b>C. 整理資料</b><small>會議逐字稿、名單、客戶資料自動整理成表格</small></span></label>
+    <label class="opt"><input type="checkbox" name="q8" value="D自己的AI助理"><span><b>D. 打造你自己的 AI 助理</b><small>交代一次你的產業跟你的規矩，之後不用每次重講一遍（就是大家在講的「AI 代理人／Agent」）</small></span></label>
+    <label class="opt"><input type="checkbox" name="q8" value="E出考卷"><span><b>E. 出考卷／做小測驗</b><small>把學過的東西變成自我檢核，也可以幫小孩出考卷</small></span></label>
+    <label class="opt"><input type="checkbox" name="q8" value="F自動跑"><span><b>F. 把重複的事自動跑起來</b><small>表單填完自動通知、客戶資料自動進表格（進階，需要 2–3 小時實作）</small></span></label>
+  </div>
+  <p class="count">已選 <b>0</b>／3</p>
+  <p class="emsg">至少選一個</p>
+</div>
+
+<div class="q" id="q9" data-req="1" data-kind="check">
+  <div class="qh"><span class="qn">Q9</span><p class="qt">你比較能到的上課方式與時段？<span class="req"> *</span></p></div>
+  <p class="qhint">可以複選</p>
+  <div class="opt-wrap">
+    <label class="opt"><input type="checkbox" name="q9" value="線上"><span>線上就好，我可以邊聽邊做</span></label>
+    <label class="opt"><input type="checkbox" name="q9" value="實體"><span>實體，我需要有人在旁邊看著我操作</span></label>
+    <label class="opt"><input type="checkbox" name="q9" value="平日白天"><span>平日白天</span></label>
+    <label class="opt"><input type="checkbox" name="q9" value="平日晚上"><span>平日晚上</span></label>
+    <label class="opt"><input type="checkbox" name="q9" value="週六白天"><span>週六白天</span></label>
+    <label class="opt"><input type="checkbox" name="q9" value="週日白天"><span>週日白天</span></label>
+  </div>
+  <p class="emsg">至少選一個</p>
+</div>
+
+<div class="q" id="q10" data-req="1" data-kind="radio">
+  <div class="qh"><span class="qn">Q10</span><p class="qt">如果這是一堂 2–3 小時、要自己帶電腦操作的實體工作坊，你覺得合理的費用是？<span class="req"> *</span></p></div>
+  <div class="opt-wrap">
+    <label class="opt"><input type="radio" name="q10" value="免費"><span>免費才會去</span></label>
+    <label class="opt"><input type="radio" name="q10" value="300以內"><span>300 元以內（大約就是場地與便當的成本）</span></label>
+    <label class="opt"><input type="radio" name="q10" value="300-800"><span>300–800 元</span></label>
+    <label class="opt"><input type="radio" name="q10" value="800-1500"><span>800–1,500 元</span></label>
+    <label class="opt"><input type="radio" name="q10" value="1500以上"><span>1,500 元以上也可以，只要真的學得會</span></label>
+  </div>
+  <p class="emsg">這題要選一個</p>
+</div>
+
+<div class="q" id="q11" data-req="1" data-kind="radio">
+  <div class="qh"><span class="qn">Q11</span><p class="qt">剛剛那些單元，如果只能先開一個，你希望是哪一個？<span class="req"> *</span></p></div>
+  <div class="opt-wrap">
+    <label class="opt"><input type="radio" name="q11" value="A從零開始"><span><b>A.</b> 從零開始</span></label>
+    <label class="opt"><input type="radio" name="q11" value="B做簡報"><span><b>B.</b> 做簡報</span></label>
+    <label class="opt"><input type="radio" name="q11" value="C整理資料"><span><b>C.</b> 整理資料</span></label>
+    <label class="opt"><input type="radio" name="q11" value="D自己的AI助理"><span><b>D.</b> 打造你自己的 AI 助理</span></label>
+    <label class="opt"><input type="radio" name="q11" value="E出考卷"><span><b>E.</b> 出考卷／做小測驗</span></label>
+    <label class="opt"><input type="radio" name="q11" value="F自動跑"><span><b>F.</b> 把重複的事自動跑起來</span></label>
+  </div>
+  <p class="emsg">這題要選一個</p>
+</div>
+
+<div class="part"><span class="part-n">第五部分</span><span class="part-r"></span><span class="part-t">最後三題</span></div>
+
+<div class="q" id="q12" data-req="1" data-kind="radio">
+  <div class="qh"><span class="qn">Q12</span><p class="qt">這門課如果照大家投的方向開出來，你會是第一批報名的人嗎？<span class="req"> *</span></p></div>
+  <div class="opt-wrap">
+    <label class="opt"><input type="radio" name="q12" value="一定會"><span>一定會</span></label>
+    <label class="opt"><input type="radio" name="q12" value="應該會"><span>應該會</span></label>
+    <label class="opt"><input type="radio" name="q12" value="再看看"><span>要再看看內容</span></label>
+    <label class="opt"><input type="radio" name="q12" value="大概不會"><span>大概不會</span></label>
+  </div>
+  <p class="emsg">這題要選一個</p>
+</div>
+
+<div class="q" id="q13" data-req="1" data-kind="radio">
+  <div class="qh"><span class="qn">Q13</span><p class="qt">你願意在課堂上分享自己的用法嗎？<span class="req"> *</span></p></div>
+  <div class="opt-wrap">
+    <label class="opt"><input type="radio" name="q13" value="願意分享"><span>願意，我有幾招可以分享</span></label>
+    <label class="opt"><input type="radio" name="q13" value="願意但要討論"><span>願意，但需要先跟我討論要講什麼</span></label>
+    <label class="opt"><input type="radio" name="q13" value="先聽就好"><span>不用了，我先聽就好</span></label>
+  </div>
+  <p class="emsg">這題要選一個</p>
+</div>
+
+<div class="q" id="q14" data-kind="text">
+  <div class="qh"><span class="qn">Q14</span><p class="qt">想第一批收到課程進度與內容預告嗎？留下 Email 或 LINE ID。</p></div>
+  <p class="qhint">選填</p>
+  <input type="text" name="q14" autocomplete="email" placeholder="Email 或 LINE ID">
+</div>
+
+<div class="q" id="q15" data-kind="text">
+  <div class="qh"><span class="qn">Q15</span><p class="qt">還有什麼想跟籌備的人說的？</p></div>
+  <p class="qhint">選填</p>
+  <textarea name="q15" rows="2" placeholder="想到什麼都可以"></textarea>
+</div>
+
+<div class="footbar">
+  <div class="inner">
+    <button class="send" id="send" type="button">送出</button>
+    <span class="saved" id="saved"></span>
+  </div>
+</div>
+</div>
+
+<div id="done">
+  <div class="donecard">
+    <div class="tick">✓</div>
+    <h2>收到了，謝謝你</h2>
+    <p style="color:var(--ink-2);margin:0">接下來會發生的事：</p>
+    <ol>
+      <li>我們會把所有人的答案整理成一張「分會 AI 程度分布圖」，<b>公開給全分會看</b>。</li>
+      <li>得票最高的三個單元，會變成第一梯次的課程大綱。</li>
+      <li>有留聯絡方式的人，開課前兩週會先收到大綱，<b>名額優先保留</b>。</li>
+    </ol>
+    <p class="last">你剛剛填的每一題，都會影響這門課長什麼樣子。</p>
+  </div>
+  <footer>BNI 華都更分會・E 組 房產客戶成長鏈</footer>
+</div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var ENDPOINT = "https://script.google.com/macros/s/AKfycbyB0n32yb0582ZsXGR2ZjxMsIUElBrqVtwFzkRt18v9ML2QyisvCxq4n9EHUsYKAtM0/exec";
+  var KEY = "bni-ai-survey-draft-v1";
+  var form = document.getElementById("form");
+  var done = document.getElementById("done");
+  var sendBtn = document.getElementById("send");
+  var savedEl = document.getElementById("saved");
+  var barI = document.querySelector("#bar i");
+  var qs = Array.prototype.slice.call(document.querySelectorAll(".q"));
+
+  function fieldsOf(q){ return Array.prototype.slice.call(q.querySelectorAll("input,textarea")); }
+
+  function valueOf(q){
+    var kind = q.dataset.kind;
+    if(kind === "text"){ var el = q.querySelector("input,textarea"); return el.value.trim(); }
+    if(kind === "radio"){ var r = q.querySelector("input:checked"); return r ? r.value : ""; }
+    return Array.prototype.slice.call(q.querySelectorAll("input:checked")).map(function(i){ return i.value; });
+  }
+
+  function filled(q){
+    var v = valueOf(q);
+    return Array.isArray(v) ? v.length > 0 : v !== "";
+  }
+
+  function updateProgress(){
+    var req = qs.filter(function(q){ return q.dataset.req; });
+    var n = req.filter(filled).length;
+    barI.style.width = (n / req.length * 100) + "%";
+  }
+
+  function enforceMax(q){
+    var max = parseInt(q.dataset.max || "0", 10);
+    if(!max) return;
+    var boxes = fieldsOf(q);
+    var checked = boxes.filter(function(b){ return b.checked; });
+    boxes.forEach(function(b){ b.disabled = !b.checked && checked.length >= max; });
+    var c = q.querySelector(".count");
+    if(c){
+      c.querySelector("b").textContent = checked.length;
+      c.classList.toggle("full", checked.length >= max);
+    }
+  }
+
+  function collect(){
+    var out = {};
+    qs.forEach(function(q){
+      var v = valueOf(q);
+      out[q.id] = Array.isArray(v) ? v.join(" / ") : v;
+    });
+    return out;
+  }
+
+  var saveTimer = null;
+  function saveDraft(){
+    try{
+      localStorage.setItem(KEY, JSON.stringify(collect()));
+      savedEl.textContent = "已暫存";
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(function(){ savedEl.textContent = ""; }, 1800);
+    }catch(e){}
+  }
+
+  function restoreDraft(){
+    var raw;
+    try{ raw = localStorage.getItem(KEY); }catch(e){ return; }
+    if(!raw) return;
+    var d;
+    try{ d = JSON.parse(raw); }catch(e){ return; }
+    qs.forEach(function(q){
+      var v = d[q.id];
+      if(!v) return;
+      var kind = q.dataset.kind;
+      if(kind === "text"){ q.querySelector("input,textarea").value = v; return; }
+      var picked = v.split(" / ");
+      fieldsOf(q).forEach(function(el){ if(picked.indexOf(el.value) > -1) el.checked = true; });
+      enforceMax(q);
+    });
+    updateProgress();
+  }
+
+  qs.forEach(function(q){
+    q.addEventListener("input", function(){ q.classList.remove("err"); updateProgress(); saveDraft(); });
+    q.addEventListener("change", function(){ q.classList.remove("err"); enforceMax(q); updateProgress(); saveDraft(); });
+  });
+
+  sendBtn.addEventListener("click", function(){
+    var bad = qs.filter(function(q){ return q.dataset.req && !filled(q); });
+    qs.forEach(function(q){ q.classList.remove("err"); });
+    if(bad.length){
+      bad.forEach(function(q){ q.classList.add("err"); });
+      bad[0].scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    sendBtn.disabled = true;
+    sendBtn.textContent = "送出中…";
+
+    var payload = collect();
+    payload.ua = navigator.userAgent.slice(0, 120);
+
+    function ok(res){
+      if(!res || !res.ok){ fail(); return; }
+      try{ localStorage.removeItem(KEY); }catch(e){}
+      form.classList.add("off");
+      done.classList.add("on");
+      barI.style.width = "100%";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    function fail(){
+      sendBtn.disabled = false;
+      sendBtn.textContent = "再送一次";
+      savedEl.textContent = "送不出去，答案還在";
+    }
+
+    fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    }).then(function(r){ return r.json(); }).then(ok).catch(fail);
+  });
+
+  restoreDraft();
+  updateProgress();
+})();
+</script>
+</body>
+</html>

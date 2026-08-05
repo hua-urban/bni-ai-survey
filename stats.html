@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>分會 AI 程度分布｜BNI 華都更</title>
+<style>
+:root{
+  --red:#C8102E; --gold:#A8813A;
+  --ground:#FBF9F6; --surface:#FFFFFF; --line:#E5DFD6; --line-soft:#F1ECE4;
+  --ink:#1D1A17; --ink-2:#5C554B; --ink-3:#8B8377;
+  --tint:#FDF3F4; --tint-line:#F2D9DD;
+  /* sequential ramp, light → dark, single hue */
+  --s1:#F6C9CF; --s2:#E99AA6; --s3:#DC6A7D; --s4:#D13B55; --s5:#A00D25;
+  --track:#F1ECE4;
+  --r:12px;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --red:#F0576F; --gold:#D9B877;
+    --ground:#161412; --surface:#211E1B; --line:#37312B; --line-soft:#282421;
+    --ink:#F2EEE8; --ink-2:#B4ACA1; --ink-3:#867E73;
+    --tint:#251A1C; --tint-line:#43282D;
+    --s1:#6B2733; --s2:#8E3243; --s3:#B33F55; --s4:#D9556D; --s5:#F58098;
+    --track:#2A2521; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  font-size:16px;line-height:1.75;letter-spacing:.012em;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px 90px}
+
+header{padding:48px 0 8px}
+.kicker{display:inline-block;font-size:12px;letter-spacing:.08em;color:var(--red);font-weight:700;
+  background:var(--tint);border:1px solid var(--tint-line);border-radius:3px;padding:3px 10px;margin-bottom:14px}
+h1{font-size:clamp(25px,5.5vw,34px);line-height:1.28;margin:0 0 10px;letter-spacing:-.02em;font-weight:700}
+.sub{color:var(--ink-3);font-size:14.5px;margin:0}
+
+.hero{display:flex;gap:14px;flex-wrap:wrap;margin:26px 0 40px}
+.tile{flex:1 1 150px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:17px 19px}
+.tile .n{font-size:32px;font-weight:700;color:var(--red);line-height:1.05;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.tile .l{font-size:13.5px;color:var(--ink-2);margin-top:6px;line-height:1.5}
+
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px 22px 18px;margin:0 0 16px}
+.fig h2{font-size:18px;margin:0 0 4px;letter-spacing:-.01em;font-weight:700}
+.fig .cap{font-size:13.5px;color:var(--ink-3);margin:0 0 18px}
+
+.rows{display:flex;flex-direction:column;gap:11px}
+.row{display:grid;grid-template-columns:1fr;gap:5px}
+.row .lab{font-size:14.5px;color:var(--ink-2);line-height:1.5}
+.row .lab b{color:var(--ink);font-weight:600}
+.barline{display:flex;align-items:center;gap:10px}
+.track{flex:1;height:14px;background:var(--track);border-radius:7px;overflow:hidden}
+.fillbar{height:100%;background:var(--red);border-radius:7px;min-width:2px;transition:width .5s cubic-bezier(.2,.7,.3,1)}
+.row .val{flex:0 0 auto;font-size:13.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;min-width:52px;text-align:right}
+.row .val b{color:var(--ink);font-weight:700;font-size:15px}
+.s1 .fillbar{background:var(--s1)} .s2 .fillbar{background:var(--s2)}
+.s3 .fillbar{background:var(--s3)} .s4 .fillbar{background:var(--s4)} .s5 .fillbar{background:var(--s5)}
+@media (prefers-reduced-motion:reduce){.fillbar{transition:none}}
+
+.quotes{display:flex;flex-direction:column;gap:9px}
+.quote{background:var(--ground);border:1px solid var(--line-soft);border-left:2px solid var(--gold);
+  border-radius:0 8px 8px 0;padding:11px 14px;font-size:14.5px;color:var(--ink-2);line-height:1.65}
+.more{font-size:13px;color:var(--ink-3);margin:12px 0 0}
+
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);
+  padding:40px 24px;text-align:center;color:var(--ink-3);font-size:15px}
+.err{background:var(--tint);border:1px solid var(--tint-line);border-radius:var(--r);
+  padding:20px 22px;color:var(--red);font-size:15px}
+footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
+table.tbl{width:100%;border-collapse:collapse;font-size:14px;margin-top:12px}
+table.tbl th,table.tbl td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line-soft)}
+table.tbl th{color:var(--ink-3);font-size:12.5px;font-weight:600}
+table.tbl td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+details.tv{margin-top:14px}
+details.tv summary{cursor:pointer;font-size:13px;color:var(--ink-3);list-style:none}
+details.tv summary::-webkit-details-marker{display:none}
+details.tv summary::before{content:"＋　"}
+details.tv[open] summary::before{content:"−　"}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="kicker">BNI 華都更分會</span>
+  <h1>分會 AI 程度分布</h1>
+  <p class="sub" id="sub">讀取中…</p>
+</header>
+
+<div id="root"></div>
+
+<footer>
+  這頁是課前問卷的即時統計，不顯示任何人的聯絡方式。<br>
+  問卷本身 → <a href="./" style="color:var(--red)">回問卷</a>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var ENDPOINT = "https://script.google.com/macros/s/AKfycbyB0n32yb0582ZsXGR2ZjxMsIUElBrqVtwFzkRt18v9ML2QyisvCxq4n9EHUsYKAtM0/exec";
+  var root = document.getElementById("root");
+  var sub = document.getElementById("sub");
+
+  var LEVEL_ORDER = ["L0","L1","L2","L3","L4"];
+  var LEVEL_LABEL = {
+    L0: "完全沒用過",
+    L1: "用過一兩次",
+    L2: "偶爾會用",
+    L3: "幾乎每天用",
+    L4: "會串工具、讓它自動跑"
+  };
+  var PRICE_ORDER = ["免費","300以內","300-800","800-1500","1500以上"];
+  var PRICE_LABEL = {
+    "免費":"免費才會去","300以內":"300 元以內","300-800":"300–800 元",
+    "800-1500":"800–1,500 元","1500以上":"1,500 元以上"
+  };
+  var INTENT_ORDER = ["一定會","應該會","再看看","大概不會"];
+  var UNIT_LABEL = {
+    "A從零開始":"A　從零開始","B做簡報":"B　做簡報","C整理資料":"C　整理資料",
+    "D自己的AI助理":"D　打造自己的 AI 助理","E出考卷":"E　出考卷／做小測驗","F自動跑":"F　把重複的事自動跑起來"
+  };
+
+  function esc(s){
+    return String(s).replace(/[&<>"]/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];
+    });
+  }
+
+  function pct(n, total){ return total ? Math.round(n / total * 100) : 0; }
+
+  // rows: [{label, n}] — already ordered. seq=true → sequential ramp by index
+  function figure(title, cap, rows, total, seq){
+    if(!rows.length) return "";
+    var max = Math.max.apply(null, rows.map(function(r){ return r.n; }));
+    var body = rows.map(function(r, i){
+      var cls = seq ? " s" + Math.min(5, i + 1) : "";
+      var w = max ? (r.n / max * 100) : 0;
+      return '<div class="row' + cls + '">' +
+        '<div class="lab">' + esc(r.label) + '</div>' +
+        '<div class="barline">' +
+          '<div class="track"><div class="fillbar" style="width:' + w + '%" title="' + esc(r.label) + '：' + r.n + ' 人"></div></div>' +
+          '<div class="val"><b>' + r.n + '</b> 人　' + pct(r.n, total) + '%</div>' +
+        '</div></div>';
+    }).join("");
+    var tbl = rows.map(function(r){
+      return "<tr><td>" + esc(r.label) + "</td><td>" + r.n + "</td></tr>";
+    }).join("");
+    return '<div class="fig"><h2>' + esc(title) + '</h2><p class="cap">' + esc(cap) + '</p>' +
+      '<div class="rows">' + body + '</div>' +
+      '<details class="tv"><summary>看數字表</summary>' +
+      '<table class="tbl"><tr><th>項目</th><th style="text-align:right">人數</th></tr>' + tbl + '</table>' +
+      '</details></div>';
+  }
+
+  function ordered(obj, order, labelMap){
+    return order.filter(function(k){ return obj[k]; }).map(function(k){
+      return { label: (labelMap && labelMap[k]) || k, n: obj[k] };
+    });
+  }
+
+  function ranked(obj, labelMap, limit){
+    var arr = Object.keys(obj || {}).map(function(k){
+      return { label: (labelMap && labelMap[k]) || k, n: obj[k] };
+    });
+    arr.sort(function(a, b){ return b.n - a.n; });
+    return limit ? arr.slice(0, limit) : arr;
+  }
+
+  function render(d){
+    var t = d.total;
+    sub.textContent = "共 " + t + " 位夥伴填答";
+
+    if(!t){
+      root.innerHTML = '<div class="empty">還沒有人填。等問卷收回來，這頁就會自動長出來。</div>';
+      return;
+    }
+
+    var lvl = d.level || {};
+    var advanced = (lvl.L3 || 0) + (lvl.L4 || 0);
+    var never = lvl.L0 || 0;
+    var topUnit = ranked(d.units, UNIT_LABEL, 1)[0];
+
+    var html = '<div class="hero">' +
+      '<div class="tile"><div class="n">' + t + '</div><div class="l">份填答</div></div>' +
+      '<div class="tile"><div class="n">' + pct(advanced, t) + '%</div><div class="l">每天都在用</div></div>' +
+      '<div class="tile"><div class="n">' + pct(never, t) + '%</div><div class="l">還沒打開過</div></div>' +
+      (topUnit ? '<div class="tile"><div class="n">' + topUnit.n + '</div><div class="l">票最高：' + esc(topUnit.label.replace(/^[A-F]　/, "")) + '</div></div>' : "") +
+      '</div>';
+
+    html += figure("用到什麼程度", "這決定課要開幾班、每班從哪裡起講",
+      ordered(lvl, LEVEL_ORDER, LEVEL_LABEL), t, true);
+
+    html += figure("最想上哪些單元", "每人最多選 3 個",
+      ranked(d.units, UNIT_LABEL), t, false);
+
+    html += figure("如果只能先開一個", "第一梯次就從票最高的開始",
+      ranked(d.firstUnit, UNIT_LABEL), t, false);
+
+    html += figure("大家卡在哪", "每人最多選 3 個，這是課程要打的點",
+      ranked(d.pains, null), t, false);
+
+    html += figure("手上在用的工具", "可複選",
+      ranked(d.tools, null), t, false);
+
+    html += figure("覺得合理的費用", "2–3 小時實體工作坊",
+      ordered(d.price || {}, PRICE_ORDER, PRICE_LABEL), t, true);
+
+    html += figure("會不會第一批報名", "只當相對排序看，不是報名人數預測",
+      ordered(d.intent || {}, INTENT_ORDER, null), t, true);
+
+    html += figure("上課方式與時段", "可複選",
+      ranked(d.mode, null), t, false);
+
+    var willing = (d.share && (d.share["願意分享"] || 0) + (d.share["願意但要討論"] || 0)) || 0;
+    if(willing){
+      html += '<div class="fig"><h2>願意上台分享的人</h2>' +
+        '<p class="cap">課堂上不只一個人在講</p>' +
+        '<div class="hero" style="margin:0">' +
+        '<div class="tile"><div class="n">' + willing + '</div><div class="l">位夥伴願意分享自己的用法</div></div>' +
+        '<div class="tile"><div class="n">' + (d.contacts || 0) + '</div><div class="l">位留了聯絡方式，開課前優先通知</div></div>' +
+        '</div></div>';
+    }
+
+    var w = (d.wishes || []).filter(function(s){ return s.length > 1; });
+    if(w.length){
+      var show = w.slice(0, 12);
+      html += '<div class="fig"><h2>大家最想解決的一件事</h2>' +
+        '<p class="cap">填答者自己寫的原話</p>' +
+        '<div class="quotes">' + show.map(function(s){
+          return '<div class="quote">' + esc(s) + '</div>';
+        }).join("") + '</div>' +
+        (w.length > show.length ? '<p class="more">另外還有 ' + (w.length - show.length) + ' 則，在試算表裡。</p>' : "") +
+        '</div>';
+    }
+
+    root.innerHTML = html;
+  }
+
+  function fail(){
+    sub.textContent = "";
+    root.innerHTML = '<div class="err">統計讀不到。可能是後端還沒部署好，或網路不通。重新整理再試一次。</div>';
+  }
+  function ok(d){
+    if(!d || !d.ok){ fail(); return; }
+    render(d);
+  }
+
+  fetch(ENDPOINT + "?p=json", { method: "GET" })
+    .then(function(r){ return r.json(); })
+    .then(ok)
+    .catch(fail);
+})();
+</script>
+</body>
+</html>
